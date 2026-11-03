@@ -1,0 +1,93 @@
+@baseUrl = http://localhost:8080/dsaApp
+
+### 1. Listar drones (200)
+GET {{baseUrl}}/drones
+
+### 2. Añadir dron (201)
+POST {{baseUrl}}/drones
+Content-Type: application/json
+
+{ "id": "D4", "name": "Buho", "manufacturer": "Autel", "model": "EVO II" }
+
+### 3. Añadir dron repetido (409)
+POST {{baseUrl}}/drones
+Content-Type: application/json
+
+{ "id": "D1", "name": "Copia", "manufacturer": "DJI", "model": "Air" }
+
+### 4. Añadir piloto (201)
+POST {{baseUrl}}/pilots
+Content-Type: application/json
+
+{ "id": "P3", "name": "Marta", "surname": "Ruiz" }
+
+### 5. Listar pilotos (200)
+GET {{baseUrl}}/pilots
+
+### 6. Reserva correcta: D1 + P1, 10:00-12:00 (201)
+POST {{baseUrl}}/flightplans
+Content-Type: application/json
+
+{
+  "droneId": "D1", "pilotId": "P1",
+  "date": "2026-11-05T10:00", "hours": 2,
+  "start": { "lat": 41.27, "lon": 1.98 },
+  "destination": { "lat": 41.39, "lon": 2.17 }
+}
+
+### 7. Reserva solapada: D1 ya vuela a las 11:00 (400)
+POST {{baseUrl}}/flightplans
+Content-Type: application/json
+
+{
+  "droneId": "D1", "pilotId": "P2",
+  "date": "2026-11-05T11:00", "hours": 1,
+  "start": { "lat": 41.27, "lon": 1.98 },
+  "destination": { "lat": 41.39, "lon": 2.17 }
+}
+
+### 8. Reserva justo después: 12:00, no solapa (201)
+POST {{baseUrl}}/flightplans
+Content-Type: application/json
+
+{
+  "droneId": "D1", "pilotId": "P2",
+  "date": "2026-11-05T12:00", "hours": 1,
+  "start": { "lat": 41.27, "lon": 1.98 },
+  "destination": { "lat": 41.39, "lon": 2.17 }
+}
+
+### 9. Guardar D2 en el almacén (201)
+POST {{baseUrl}}/warehouse/D2
+
+### 10. Reserva con dron en mantenimiento (400)
+POST {{baseUrl}}/flightplans
+Content-Type: application/json
+
+{
+  "droneId": "D2", "pilotId": "P1",
+  "date": "2026-11-06T10:00", "hours": 1,
+  "start": { "lat": 41.27, "lon": 1.98 },
+  "destination": { "lat": 41.39, "lon": 2.17 }
+}
+
+### 11. Guardar D3 en el almacén (201)
+POST {{baseUrl}}/warehouse/D3
+
+### 12. Reparar: sale D3, el último que entró (200)
+PUT {{baseUrl}}/warehouse/repair
+
+### 13. Reparar: sale D2 (200)
+PUT {{baseUrl}}/warehouse/repair
+
+### 14. Reparar con el almacén vacío (404)
+PUT {{baseUrl}}/warehouse/repair
+
+### 15. Reservas de P1 (200, 1 reserva)
+GET {{baseUrl}}/pilots/P1/flightplans
+
+### 16. Reservas de D1 (200, 2 reservas)
+GET {{baseUrl}}/drones/D1/flightplans
+
+### 17. Reservas de piloto inexistente (404)
+GET {{baseUrl}}/pilots/P99/flightplans
